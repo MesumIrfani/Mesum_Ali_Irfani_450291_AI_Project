@@ -20,23 +20,23 @@ class SnakeGame:
 
         self.score = 0
         self.score_label = None
-        self.snake_length_label = None  # Added snake length label
+        self.snake_length_label = None  
 
         self.game_over_text = None
 
         self.create_score_board()
-        self.create_food()  # Initial food for the player snake
-        self.create_obstacles()  # Initial obstacles
+        self.create_food()
+        self.create_obstacles() 
 
         self.update()
         self.master.bind("<KeyPress-r>", self.restart_game)
 
     def create_score_board(self):
         self.score_label = self.canvas.create_text(
-            50, 10, text=f"Score: {self.score}", fill="white", font=("Helvetica", 10)
+            50, 30, text=f"Score: {self.score}", fill="white", font=("TkDefaultFont", 15)
         )
         self.snake_length_label = self.canvas.create_text(
-            350, 10, text=f"Length: {len(self.snake)}", fill="white", font=("Helvetica", 10)
+            340, 30, text=f"Length: {len(self.snake)}", fill="white", font=("TkDefaultFont", 15)
         )
 
     def draw_snake(self, snake, color):
@@ -47,8 +47,7 @@ class SnakeGame:
 
     def draw_score_board(self):
         self.canvas.itemconfig(self.score_label, text=f"Score: {self.score}")
-        self.canvas.itemconfig(self.snake_length_label, text=f"Length: {len(self.snake)}")  # Update snake length label
-
+        self.canvas.itemconfig(self.snake_length_label, text=f"Length: {len(self.snake)}")  
     def move_snake(self, snake, direction):
         head = snake[0]
         x, y = head
@@ -81,11 +80,11 @@ class SnakeGame:
             self.canvas.delete("food")
             self.food = None
 
-        x = random.randint(0, 39) * 10
-        y = random.randint(0, 39) * 10
+        x = random.randint(5, 33) * 10
+        y = random.randint(5, 33) * 10
         while (x, y) in self.snake or (x, y) in self.obstacles or (x, y) in self.enemy_snake:
-            x = random.randint(0, 39) * 10
-            y = random.randint(0, 39) * 10
+            x = random.randint(5, 33) * 10
+            y = random.randint(5, 33) * 10
         self.food = (x, y)
         self.canvas.create_rectangle(x, y, x + 10, y + 10, fill="red", tags="food")
 
@@ -130,14 +129,28 @@ class SnakeGame:
                 self.enemy_snake.pop()
 
     def create_obstacles(self):
+    
+        for x in range(0, 400, 10):
+            self.obstacles.append((x, 0))
+            self.obstacles.append((x, 390))
+            self.canvas.create_rectangle(x, 0, x + 10, 10, fill="purple", tags="obstacle")
+            self.canvas.create_rectangle(x, 390, x + 10, 400, fill="purple", tags="obstacle")
+    
+        for y in range(10, 390, 10):
+            self.obstacles.append((0, y))
+            self.obstacles.append((390, y))
+            self.canvas.create_rectangle(0, y, 10, y + 10, fill="purple", tags="obstacle")
+            self.canvas.create_rectangle(390, y, 400, y + 10, fill="purple", tags="obstacle")
+    
         for _ in range(10):
             x = random.randint(0, 39) * 10
-            y = random.randint(0, 39) * 10
-            while (x, y) in self.snake or (x, y) in self.obstacles or (x, y) == self.food:
+            y = random.randint(5, 39) * 10
+            while (x, y) in self.snake or (x, y) in self.obstacles or (x, y) == self.food or (x, y) in self.enemy_snake:
                 x = random.randint(0, 39) * 10
-                y = random.randint(0, 39) * 10
+                y = random.randint(5, 39) * 10
             self.obstacles.append((x, y))
             self.canvas.create_rectangle(x, y, x + 10, y + 10, fill="blue", tags="obstacle")
+
 
     def check_collision(self):
         return (
@@ -154,15 +167,15 @@ class SnakeGame:
         if head == self.food:
             self.score += 1
             new_segment = (self.snake[-1][0], self.snake[-1][1])
-            self.snake.append(new_segment)  # Append a new segment for the user snake
+            self.snake.append(new_segment)  
             self.create_food()
             self.draw_score_board()
     
-        if self.enemy_snake:  # Check if the enemy snake exists
+        if self.enemy_snake: 
             head_enemy = self.enemy_snake[0]
             if head_enemy == self.food:
-                self.score += 1
-                self.enemy_snake.append((0, 0))  # Append a new segment for the AI snake
+                self.score -= 1
+                self.enemy_snake.append((0, 0))  
                 self.create_food()
                 self.draw_score_board()
 
@@ -182,14 +195,13 @@ class SnakeGame:
         return self.snake[0] in self.enemy_snake
 
     def game_over(self):
-        self.master.after_cancel(self.after_id)
+        self.master.after_cancel(self.after_id) 
         self.game_over_text = self.canvas.create_text(
-            200, 200, text="Game Over", fill="white", font=("Helvetica", 16)
+            200, 200, text="Game Over", fill="red", font=("Courier", 30)
         )
-        if self.game_over_text is None:
-            self.game_over_text = self.canvas.create_text(
-                200, 200, text="Game Over", fill="white", font=("Helvetica", 16)
-            )
+        
+    
+
 
     def restart_game(self, event):
         self.canvas.delete("all")
@@ -218,13 +230,16 @@ class SnakeGame:
             self.draw_snake(self.snake, "green")
             self.draw_snake(self.enemy_snake, "orange")
             self.draw_score_board()
-            self.after_id = self.master.after(100, self.update)  # Update after_id here
+            self.after_id = self.master.after(100, self.update)  
         else:
             self.game_over()
             self.game_over_text = self.canvas.create_text(
-                200, 200, text="Game Over", fill="white", font=("Helvetica", 16)
+                200, 200, text="Game Over", fill="red", font=("Courier", 30)
             )
-
+            self.game_over_text = self.canvas.create_text(
+                200, 250, text="Press 'r' to restart", fill="red", font=("Courier", 15)
+            )
+ 
 
     def on_keypress(self, event):
         key = event.keysym
